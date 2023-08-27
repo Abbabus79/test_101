@@ -35,13 +35,32 @@ mount_azure_file_share() {
 
     # Change ownership
     chown oracle: /mnt/rman
+    
+    # Determine which mount targets to use based on environment
+    case ${ENVIRONMENT_GROUP} in
+        "dev")
+            TARGETS=("dev")
+            ;;
+        "nonprod")
+            TARGETS=("nonprod")
+            ;;
+        "prod")
+            TARGETS=("nonprod","prod")
+            ;;
+        *)
+            echo "Invalid environment group specified."
+            exit 1
+            ;;
+    esac    
 
-    # Split the storage account names and keys, and loop through each
+
+    # Split the storage account names, keys, hostnmes, mount targets and loop through each
     IFS=',' read -ra ACCOUNTS <<<"${STORAGE_ACCOUNT_NAME}"
     IFS=',' read -ra KEYS <<<"${STORAGE_ACCOUNT_KEY}"
     IFS=',' read -ra HOSTNAMES <<<"${STORAGE_ACCOUNT_HOSTNAME}"
     IFS=',' read -ra FILE_SHARES <<<"${FILE_SHARE}"
-
+    IFS=',' read -ra MOUNT_TARGETS <<<"${TARGETS}"
+        
     for index in "${!ACCOUNTS[@]}"; do
         storage_account=${ACCOUNTS[index]}
         storage_key=${KEYS[index]}
@@ -56,44 +75,22 @@ mount_azure_file_share() {
         echo "username=${storage_account}" | sudo tee "${credential_file}" >/dev/null
         echo "password=${storage_key}" | sudo tee -a "${credential_file}" >/dev/null
         chmod 600 "${credential_file}"
-
-        # Determine which mount targets to use based on environment
-        case ${ENVIRONMENT_GROUP} in
-        "dev")
-            TARGETS=("dev")
-            ;;
-        "nonprod")
-            TARGETS=("nonprod")
-            ;;
-        "prod")
-            TARGETS=("nonprod","prod")
-            ;;
-        *)
-            echo "Invalid environment group specified."
-            exit 1
-            ;;
-        esac
-
-        # Split the mount targets, and loop through each
-        IFS=',' read -ra MOUNT_TARGETS <<<"${TARGETS}"
-
+        
         # Mount targets if they're not already mounted
-        for target in "${MOUNT_TARGETS[@]}"; do
-            MOUNT_POINT="/mnt/rman/${target}"
+            MOUNT_POINT="/mnt/rman/${MOUNT_TARGETS[index]}"
+
             [ ! -d "${MOUNT_POINT}" ] && mkdir -p "${MOUNT_POINT}"
 
             if ! mountpoint -q "${MOUNT_POINT}"; then
-                echo "************STORAGE ACCOUNT HOSTNAME VALUE BEFORE MOUNT ************* ${HOSTNAMES[index]}"
-                sudo mount -t cifs "//${HOSTNAMES[index]}/${file_share}" "${MOUNT_POINT}" -o vers=3.0,credentials=/etc/smbcredentials/${storage_account}.cred,uid=${ORACLEUID},gid=${ORACLEGID},serverino,sec=ntlmssp
+                echo "************STORAGE ACCOUNT HOSTNAME VALUE BEFORE MOUNT ************* $storage_account_hostname"
+                sudo mount -t cifs "//${storage_account_hostname}/${file_share}" "${MOUNT_POINT}" -o vers=3.0,credentials=/etc/smbcredentials/${storage_account}.cred,uid=${ORACLEUID},gid=${ORACLEGID},serverino,sec=ntlmssp
             fi
 
             # Add to fstab if not already present
-            FSTAB_ENTRY="//${HOSTNAMES[index]}/${file_share} ${MOUNT_POINT} cifs nofail,vers=3.0,credentials=/etc/smbcredentials/${storage_account}.cred,uid=${ORACLEUID},gid=${ORACLEGID},serverino"
+            FSTAB_ENTRY="//${storage_account_hostname}/${file_share} ${MOUNT_POINT} cifs nofail,vers=3.0,credentials=/etc/smbcredentials/${storage_account}.cred,uid=${ORACLEUID},gid=${ORACLEGID},serverino"
             if ! grep -qF "${FSTAB_ENTRY}" /etc/fstab; then
                 echo "${FSTAB_ENTRY}" | sudo tee -a /etc/fstab >/dev/null
             fi
-        done
-
     done
 
 }
