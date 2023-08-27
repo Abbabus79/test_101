@@ -65,8 +65,6 @@ mount_azure_file_share() {
         storage_account=${ACCOUNTS[index]}
         storage_key=${KEYS[index]}
         storage_account_hostname=${HOSTNAMES[index]}
-
-        echo "************STORAGE ACCOUNT HOSTNAME************* $storage_account_hostname"
         file_share=${FILE_SHARES[index]}
 
         # Initialize each storage account credential file and other operations
@@ -82,7 +80,6 @@ mount_azure_file_share() {
             [ ! -d "${MOUNT_POINT}" ] && mkdir -p "${MOUNT_POINT}"
 
             if ! mountpoint -q "${MOUNT_POINT}"; then
-                echo "************STORAGE ACCOUNT HOSTNAME VALUE BEFORE MOUNT ************* $storage_account_hostname"
                 sudo mount -t cifs "//${storage_account_hostname}/${file_share}" "${MOUNT_POINT}" -o vers=3.0,credentials=/etc/smbcredentials/${storage_account}.cred,uid=${ORACLEUID},gid=${ORACLEGID},serverino,sec=ntlmssp
             fi
 
