@@ -46,6 +46,8 @@ mount_azure_file_share() {
         storage_account=${ACCOUNTS[index]}
         storage_key=${KEYS[index]}
         storage_account_hostname=${HOSTNAMES[index]}
+
+        echo "************STORAGE ACCOUNT HOSTNAME************* $storage_account_hostname"
         file_share=${FILE_SHARES[index]}
 
         # Initialize each storage account credential file and other operations
