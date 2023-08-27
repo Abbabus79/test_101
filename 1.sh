@@ -66,7 +66,7 @@ mount_azure_file_share() {
             TARGETS=("nonprod")
             ;;
         "prod")
-            TARGETS=("prod","nonprod")
+            TARGETS=("nonprod","prod")
             ;;
         *)
             echo "Invalid environment group specified."
