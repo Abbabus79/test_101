@@ -83,12 +83,12 @@ mount_azure_file_share() {
             [ ! -d "${MOUNT_POINT}" ] && mkdir -p "${MOUNT_POINT}"
 
             if ! mountpoint -q "${MOUNT_POINT}"; then
-                echo "************STORAGE ACCOUNT HOSTNAME VALUE BEFORE MOUNT ************* $storage_account_hostname"
-                sudo mount -t cifs "//${storage_account_hostname}/${file_share}" "${MOUNT_POINT}" -o vers=3.0,credentials=/etc/smbcredentials/${storage_account}.cred,uid=${ORACLEUID},gid=${ORACLEGID},serverino,sec=ntlmssp
+                echo "************STORAGE ACCOUNT HOSTNAME VALUE BEFORE MOUNT ************* ${HOSTNAMES[index]}"
+                sudo mount -t cifs "//${HOSTNAMES[index]}/${file_share}" "${MOUNT_POINT}" -o vers=3.0,credentials=/etc/smbcredentials/${storage_account}.cred,uid=${ORACLEUID},gid=${ORACLEGID},serverino,sec=ntlmssp
             fi
 
             # Add to fstab if not already present
-            FSTAB_ENTRY="//${storage_account_hostname}/${file_share} ${MOUNT_POINT} cifs nofail,vers=3.0,credentials=/etc/smbcredentials/${storage_account}.cred,uid=${ORACLEUID},gid=${ORACLEGID},serverino"
+            FSTAB_ENTRY="//${HOSTNAMES[index]}/${file_share} ${MOUNT_POINT} cifs nofail,vers=3.0,credentials=/etc/smbcredentials/${storage_account}.cred,uid=${ORACLEUID},gid=${ORACLEGID},serverino"
             if ! grep -qF "${FSTAB_ENTRY}" /etc/fstab; then
                 echo "${FSTAB_ENTRY}" | sudo tee -a /etc/fstab >/dev/null
             fi
