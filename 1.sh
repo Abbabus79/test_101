@@ -145,13 +145,13 @@ mount_azure_file_share
 
 # Set Bootloader Password
 echo "Checking for bootloader password"
-if [ ! -f /boot/efi/EFI/redhat/user.cfg ]; then
-    echo "Setting bootloader password"
-    echo "printf '%s\n' \"$BOOTLOADERPASSWORD\" \"$BOOTLOADERPASSWORD\" | script -qf -c 'grub2-setpassword' /dev/null" >/tmp/grub-pass.sh
-    chmod +x /tmp/grub-pass.sh
-    nohup bash /tmp/grub-pass.sh &
-    rm -f /tmp/grub-pass.sh
-fi
+# if [ ! -f /boot/efi/EFI/redhat/user.cfg ]; then
+#     echo "Setting bootloader password"
+#     echo "printf '%s\n' \"$BOOTLOADERPASSWORD\" \"$BOOTLOADERPASSWORD\" | script -qf -c 'grub2-setpassword' /dev/null" >/tmp/grub-pass.sh
+#     chmod +x /tmp/grub-pass.sh
+#     nohup bash /tmp/grub-pass.sh &
+#     rm -f /tmp/grub-pass.sh
+# fi
 
 
 # Set TimeZone
@@ -210,17 +210,17 @@ echo "dba ALL=(ALL:ALL) NOPASSWD: ALL
 systemsadmin ALL=(ALL:ALL) NOPASSWD: ALL" >/etc/sudoers.d/pamusers
 chmod 0440 /etc/sudoers.d/pamusers
 
-# Create svc.secscan user for Rapid7 scanning occurred during image build, so we just modify here
-echo "adding svc.secscan user and config"
+# # Create svc.secscan user for Rapid7 scanning occurred during image build, so we just modify here
+# echo "adding svc.secscan user and config"
 
-# Add the public CLIENT key to the svc.secscan account (Sourced from PasswordState)
-if ! grep -qF "${RAPID7SCANPUBKEY}" /home/svc.secscan/.ssh/authorized_keys; then
-    echo "${RAPID7SCANPUBKEY}" >/home/svc.secscan/.ssh/authorized_keys
-fi
-# Reset permission on authorized_keys just in case
-chown -R svc.secscan:svc.secscan /home/svc.secscan/.ssh
-chmod 644 /home/svc.secscan/.ssh/authorized_keys
-chmod 700 /home/svc.secscan/.ssh
+# # Add the public CLIENT key to the svc.secscan account (Sourced from PasswordState)
+# if ! grep -qF "${RAPID7SCANPUBKEY}" /home/svc.secscan/.ssh/authorized_keys; then
+#     echo "${RAPID7SCANPUBKEY}" >/home/svc.secscan/.ssh/authorized_keys
+# fi
+# # Reset permission on authorized_keys just in case
+# chown -R svc.secscan:svc.secscan /home/svc.secscan/.ssh
+# chmod 644 /home/svc.secscan/.ssh/authorized_keys
+# chmod 700 /home/svc.secscan/.ssh
 
 # Restart SSHD
 echo "restart SSHD"
