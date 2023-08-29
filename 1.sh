@@ -38,6 +38,7 @@ mount_azure_file_share() {
     
     # Determine which mount targets to use based on environment
     # Determine which mount targets to use based on environment
+    local ENVIRONMENT_GROUP="$1"
     case ${ENVIRONMENT_GROUP} in
     "dev")
         TARGETS="dev"
