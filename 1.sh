@@ -63,7 +63,8 @@ mount_azure_file_share() {
     IFS=',' read -ra FILE_SHARES <<<"${FILE_SHARE}"
     IFS=',' read -ra MOUNT_TARGETS <<<"${TARGETS}"
         
-    for TARGET in "${TARGETS[@]}"; do
+     
+  for TARGET in "${TARGETS[@]}"; do
     for index in "${!ACCOUNTS[@]}"; do
         if [[ "${MOUNT_TARGETS[index]}" == "${TARGET}" ]]; then
             storage_account=${ACCOUNTS[index]}
@@ -92,6 +93,8 @@ mount_azure_file_share() {
             if ! grep -qF "${FSTAB_ENTRY}" /etc/fstab; then
                 echo "${FSTAB_ENTRY}" | sudo tee -a /etc/fstab >/dev/null
             fi
+          fi
+        done
     done
 
 }
