@@ -37,21 +37,22 @@ mount_azure_file_share() {
     chown oracle: /mnt/rman
     
     # Determine which mount targets to use based on environment
+    # Determine which mount targets to use based on environment
     case ${ENVIRONMENT_GROUP} in
-        "dev")
-            TARGETS=("dev")
-            ;;
-        "nonprod")
-            TARGETS=("nonprod")
-            ;;
-        "prod")
-            TARGETS=("nonprod","prod")
-            ;;
-        *)
-            echo "Invalid environment group specified."
-            exit 1
-            ;;
-    esac    
+    "dev")
+        TARGETS="dev"
+        ;;
+    "nonprod")
+        TARGETS="nonprod"
+        ;;
+    "prod")
+        TARGETS="nonprod,prod"
+        ;;
+    *)
+        echo "Invalid environment group specified."
+        exit 1
+        ;;
+    esac
 
 
     # Split the storage account names, keys, hostnmes, mount targets and loop through each
