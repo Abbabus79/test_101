@@ -56,13 +56,14 @@ mount_azure_file_share() {
     esac
 
 
+   
     # Split the storage account names, keys, hostnmes, mount targets and loop through each
     IFS=',' read -ra ACCOUNTS <<<"${STORAGE_ACCOUNT_NAME}"
     IFS=',' read -ra KEYS <<<"${STORAGE_ACCOUNT_KEY}"
     IFS=',' read -ra HOSTNAMES <<<"${STORAGE_ACCOUNT_HOSTNAME}"
     IFS=',' read -ra FILE_SHARES <<<"${FILE_SHARE}"
     IFS=',' read -ra MOUNT_TARGETS <<<"${TARGETS}"
-        
+
     for index in "${!ACCOUNTS[@]}"; do
         storage_account=${ACCOUNTS[index]}
         storage_key=${KEYS[index]}
@@ -75,27 +76,24 @@ mount_azure_file_share() {
         echo "username=${storage_account}" | sudo tee "${credential_file}" >/dev/null
         echo "password=${storage_key}" | sudo tee -a "${credential_file}" >/dev/null
         chmod 600 "${credential_file}"
-        
+
         # Mount targets if they're not already mounted
-            MOUNT_POINT="/mnt/rman/${MOUNT_TARGETS[index]}"
+        MOUNT_POINT="/mnt/rman/${MOUNT_TARGETS[index]}"
 
-            [ ! -d "${MOUNT_POINT}" ] && mkdir -p "${MOUNT_POINT}"
+        [ ! -d "${MOUNT_POINT}" ] && mkdir -p "${MOUNT_POINT}"
 
-            if ! mountpoint -q "${MOUNT_POINT}"; then
-                sudo mount -t cifs "//${storage_account_hostname}/${file_share}" "${MOUNT_POINT}" -o vers=3.0,credentials=/etc/smbcredentials/${storage_account}.cred,uid=${ORACLEUID},gid=${ORACLEGID},serverino,sec=ntlmssp
-            fi
+        if ! mountpoint -q "${MOUNT_POINT}"; then
+            sudo mount -t cifs "//${storage_account_hostname}/${file_share}" "${MOUNT_POINT}" -o vers=3.0,credentials=/etc/smbcredentials/${storage_account}.cred,uid=${ORACLEUID},gid=${ORACLEGID},serverino,sec=ntlmssp
+        fi
 
-            # Add to fstab if not already present
-            FSTAB_ENTRY="//${storage_account_hostname}/${file_share} ${MOUNT_POINT} cifs nofail,vers=3.0,credentials=/etc/smbcredentials/${storage_account}.cred,uid=${ORACLEUID},gid=${ORACLEGID},serverino"
-            if ! grep -qF "${FSTAB_ENTRY}" /etc/fstab; then
-                echo "${FSTAB_ENTRY}" | sudo tee -a /etc/fstab >/dev/null
-            fi
-          fi
-        done
+        # Add to fstab if not already present
+        FSTAB_ENTRY="//${storage_account_hostname}/${file_share} ${MOUNT_POINT} cifs nofail,vers=3.0,credentials=/etc/smbcredentials/${storage_account}.cred,uid=${ORACLEUID},gid=${ORACLEGID},serverino"
+        if ! grep -qF "${FSTAB_ENTRY}" /etc/fstab; then
+            echo "${FSTAB_ENTRY}" | sudo tee -a /etc/fstab >/dev/null
+        fi
     done
 
 }
-
 # Set variables from arguments passed in by Terraform custom script extension
 CLIENTCODE="${1}"
 LINUXTIMEZONE="${2}"
