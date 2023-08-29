@@ -40,13 +40,13 @@ mount_azure_file_share() {
     # Determine which mount targets to use based on environment
     case ${ENVIRONMENT_GROUP} in
     "dev")
-        TARGETS="dev"
+        TARGETS=("dev")
         ;;
     "nonprod")
-        TARGETS="nonprod"
+        TARGETS=("nonprod")
         ;;
     "prod")
-        TARGETS="nonprod,prod"
+        TARGETS=("nonprod","prod")
         ;;
     *)
         echo "Invalid environment group specified."
