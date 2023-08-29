@@ -47,7 +47,7 @@ mount_azure_file_share() {
         TARGETS="nonprod"
         ;;
     "prod")
-        TARGETS="nonprod,prod"
+        TARGETS="prod,nonprod"
         ;;
     *)
         echo "Invalid environment group specified."
@@ -63,14 +63,11 @@ mount_azure_file_share() {
     IFS=',' read -ra FILE_SHARES <<<"${FILE_SHARE}"
     IFS=',' read -ra MOUNT_TARGETS <<<"${TARGETS}"
         
-     
-  for TARGET in "${TARGETS[@]}"; do
     for index in "${!ACCOUNTS[@]}"; do
-        if [[ "${MOUNT_TARGETS[index]}" == "${TARGET}" ]]; then
-            storage_account=${ACCOUNTS[index]}
-            storage_key=${KEYS[index]}
-            storage_account_hostname=${HOSTNAMES[index]}
-            file_share=${FILE_SHARES[index]}
+        storage_account=${ACCOUNTS[index]}
+        storage_key=${KEYS[index]}
+        storage_account_hostname=${HOSTNAMES[index]}
+        file_share=${FILE_SHARES[index]}
 
         # Initialize each storage account credential file and other operations
         credential_file="/etc/smbcredentials/${storage_account}.cred"
